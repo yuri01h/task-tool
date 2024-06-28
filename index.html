@@ -10,6 +10,11 @@
     <h1>タスク管理表</h1>
     <form id="task-form">
         <input type="hidden" id="edit-index">
+        <label for="category">大項目:</label>
+        <select id="category" name="category" required>
+            <option value="労務">労務</option>
+            <option value="総務">総務</option>
+        </select>
         <label for="task">タスク:</label>
         <input type="text" id="task" name="task" required>
         <label for="progress">進捗 (%):</label>
@@ -39,21 +44,41 @@
 
     <p id="warning-message" class="warning-message">3日以内に期日が迫っているタスクがあります！</p>
 
-    <table id="task-table">
-        <thead>
-            <tr>
-                <th>タスク</th>
-                <th>進捗</th>
-                <th>ステータス</th>
-                <th>優先順位</th>
-                <th>期日</th>
-                <th>担当者</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+    <div id="task-sections">
+        <h2>労務</h2>
+        <table id="labor-task-table">
+            <thead>
+                <tr>
+                    <th>タスク</th>
+                    <th>進捗</th>
+                    <th>ステータス</th>
+                    <th>優先順位</th>
+                    <th>期日</th>
+                    <th>担当者</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+        <h2>総務</h2>
+        <table id="general-task-table">
+            <thead>
+                <tr>
+                    <th>タスク</th>
+                    <th>進捗</th>
+                    <th>ステータス</th>
+                    <th>優先順位</th>
+                    <th>期日</th>
+                    <th>担当者</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
 
     <script src="script.js"></script>
 </body>
