@@ -94,6 +94,9 @@ tr:nth-child(even) {
 .warning {
     background-color: #ffcccb;
 }
+.overdue {
+    background-color: #ff9999;
+}
 .warning-message {
     color: red;
     font-weight: bold;
