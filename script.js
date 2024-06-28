@@ -18,7 +18,7 @@ document.getElementById('task-form').addEventListener('submit', function(event) 
         const newRow = table.insertRow();
         addCells(newRow, task, progress, status, priority, deadline, assignee, sender);
     } else {
-        const row = document.getElementById(editIndex).parentNode.parentNode;
+        const row = table.rows[editIndex];
         updateCells(row, task, progress, status, priority, deadline, assignee, sender);
         document.getElementById('edit-index').value = '';
     }
@@ -57,7 +57,7 @@ function addCells(row, task, progress, status, priority, deadline, assignee, sen
     editButton.textContent = '編集';
     editButton.className = 'edit-button';
     editButton.onclick = function() {
-        editTask(row.rowIndex - 1, row.parentNode.id);
+        editTask(row.rowIndex - 1, row.parentNode.parentNode.id);
     };
     actionsCell.appendChild(editButton);
 
@@ -65,7 +65,7 @@ function addCells(row, task, progress, status, priority, deadline, assignee, sen
     deleteButton.textContent = '削除';
     deleteButton.className = 'delete-button';
     deleteButton.onclick = function() {
-        deleteTask(row.rowIndex - 1, row.parentNode.id);
+        deleteTask(row.rowIndex - 1, row.parentNode.parentNode.id);
     };
     actionsCell.appendChild(deleteButton);
 
@@ -73,7 +73,7 @@ function addCells(row, task, progress, status, priority, deadline, assignee, sen
     messageButton.textContent = 'メッセージ';
     messageButton.className = 'message-button';
     messageButton.onclick = function() {
-        toggleMessageContainer(row.rowIndex - 1);
+        toggleMessageContainer(row.rowIndex - 1, row.parentNode.parentNode.id);
     };
     actionsCell.appendChild(messageButton);
 
@@ -123,7 +123,7 @@ function updateCells(row, task, progress, status, priority, deadline, assignee, 
 }
 
 function updateRowStyle(row, progress, deadline) {
-    row.classList.remove('category-high', 'category-medium', 'category-low', 'warning');
+    row.classList.remove('category-high', 'category-medium', 'category-low', 'warning', 'overdue');
     if (progress >= 75) {
         row.classList.add('category-high');
     } else if (progress >= 50) {
@@ -137,8 +137,10 @@ function updateRowStyle(row, progress, deadline) {
     const timeDiff = deadlineDate.getTime() - today.getTime();
     const dayDiff = timeDiff / (1000 * 3600 * 24);
 
-    if (dayDiff <= 3) {
+    if (dayDiff <= 3 && dayDiff >= 0) {
         row.classList.add('warning');
+    } else if (dayDiff < 0) {
+        row.classList.add('overdue');
     }
 }
 
@@ -151,7 +153,7 @@ function checkWarnings() {
         const rows = table.getElementsByTagName('tr');
 
         for (let i = 0; i < rows.length; i++) {
-            if (rows[i].classList.contains('warning')) {
+            if (rows[i].classList.contains('warning') || rows[i].classList.contains('overdue')) {
                 hasWarning = true;
                 break;
             }
@@ -228,15 +230,11 @@ function getAssigneeColor(assignee) {
     return `background-color: ${color};`;
 }
 
-function toggleMessageContainer(index) {
-    const tables = ['labor-task-table', 'general-task-table'];
-
-    tables.forEach(tableId => {
-        const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
-        const row = table.rows[index];
-        const messageContainer = row.querySelector('.message-container');
-        messageContainer.style.display = messageContainer.style.display === 'none' ? 'block' : 'none';
-    });
+function toggleMessageContainer(index, tableId) {
+    const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+    const row = table.rows[index];
+    const messageContainer = row.querySelector('.message-container');
+    messageContainer.style.display = messageContainer.style.display === 'none' ? 'block' : 'none';
 }
 
 function sendMessage(message, container, sender) {
