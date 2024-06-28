@@ -1,6 +1,7 @@
 document.getElementById('task-form').addEventListener('submit', function(event) {
     event.preventDefault();
 
+    const category = document.getElementById('category').value;
     const task = document.getElementById('task').value;
     const progress = document.getElementById('progress').value;
     const status = document.getElementById('status').value;
@@ -10,18 +11,19 @@ document.getElementById('task-form').addEventListener('submit', function(event) 
     const sender = document.getElementById('sender').value;
     const editIndex = document.getElementById('edit-index').value;
 
-    const table = document.getElementById('task-table').getElementsByTagName('tbody')[0];
+    const tableId = category === '労務' ? 'labor-task-table' : 'general-task-table';
+    const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
 
     if (editIndex === '') {
         const newRow = table.insertRow();
         addCells(newRow, task, progress, status, priority, deadline, assignee, sender);
     } else {
-        const row = table.rows[editIndex];
+        const row = document.getElementById(editIndex).parentNode.parentNode;
         updateCells(row, task, progress, status, priority, deadline, assignee, sender);
         document.getElementById('edit-index').value = '';
     }
 
-    sortTable();
+    sortTable(table);
     document.getElementById('task-form').reset();
     checkWarnings();
 });
@@ -55,7 +57,7 @@ function addCells(row, task, progress, status, priority, deadline, assignee, sen
     editButton.textContent = '編集';
     editButton.className = 'edit-button';
     editButton.onclick = function() {
-        editTask(row.rowIndex - 1);
+        editTask(row.rowIndex - 1, row.parentNode.id);
     };
     actionsCell.appendChild(editButton);
 
@@ -63,7 +65,7 @@ function addCells(row, task, progress, status, priority, deadline, assignee, sen
     deleteButton.textContent = '削除';
     deleteButton.className = 'delete-button';
     deleteButton.onclick = function() {
-        deleteTask(row.rowIndex - 1);
+        deleteTask(row.rowIndex - 1, row.parentNode.id);
     };
     actionsCell.appendChild(deleteButton);
 
@@ -130,7 +132,6 @@ function updateRowStyle(row, progress, deadline) {
         row.classList.add('category-low');
     }
 
-    // 期日が近い場合に警告を表示
     const today = new Date();
     const deadlineDate = new Date(deadline);
     const timeDiff = deadlineDate.getTime() - today.getTime();
@@ -142,16 +143,20 @@ function updateRowStyle(row, progress, deadline) {
 }
 
 function checkWarnings() {
-    const table = document.getElementById('task-table').getElementsByTagName('tbody')[0];
-    const rows = table.getElementsByTagName('tr');
+    const tables = ['labor-task-table', 'general-task-table'];
     let hasWarning = false;
 
-    for (let i = 0; i < rows.length; i++) {
-        if (rows[i].classList.contains('warning')) {
-            hasWarning = true;
-            break;
+    tables.forEach(tableId => {
+        const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+        const rows = table.getElementsByTagName('tr');
+
+        for (let i = 0; i < rows.length; i++) {
+            if (rows[i].classList.contains('warning')) {
+                hasWarning = true;
+                break;
+            }
         }
-    }
+    });
 
     if (hasWarning) {
         document.getElementById('warning-message').style.display = 'block';
@@ -160,10 +165,11 @@ function checkWarnings() {
     }
 }
 
-function editTask(index) {
-    const table = document.getElementById('task-table').getElementsByTagName('tbody')[0];
+function editTask(index, tableId) {
+    const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
     const row = table.rows[index];
 
+    document.getElementById('category').value = tableId === 'labor-task-table' ? '労務' : '総務';
     document.getElementById('task').value = row.cells[0].textContent;
     document.getElementById('progress').value = parseInt(row.cells[1].querySelector('.progress-bar').textContent);
     document.getElementById('status').value = row.cells[2].textContent;
@@ -174,8 +180,8 @@ function editTask(index) {
     document.getElementById('edit-index').value = index;
 }
 
-function deleteTask(index) {
-    const table = document.getElementById('task-table').getElementsByTagName('tbody')[0];
+function deleteTask(index, tableId) {
+    const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
     table.deleteRow(index);
     document.getElementById('edit-index').value = '';
     checkWarnings();
@@ -183,22 +189,25 @@ function deleteTask(index) {
 
 function filterTasks() {
     const searchInput = document.getElementById('search').value.toLowerCase();
-    const table = document.getElementById('task-table').getElementsByTagName('tbody')[0];
-    const rows = table.getElementsByTagName('tr');
+    const tables = ['labor-task-table', 'general-task-table'];
 
-    for (let i = 0; i < rows.length; i++) {
-        const cells = rows[i].getElementsByTagName('td');
-        let taskName = cells[0].textContent.toLowerCase();
-        if (taskName.indexOf(searchInput) > -1) {
-            rows[i].style.display = "";
-        } else {
-            rows[i].style.display = "none";
+    tables.forEach(tableId => {
+        const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+        const rows = table.getElementsByTagName('tr');
+
+        for (let i = 0; i < rows.length; i++) {
+            const cells = rows[i].getElementsByTagName('td');
+            let taskName = cells[0].textContent.toLowerCase();
+            if (taskName.indexOf(searchInput) > -1) {
+                rows[i].style.display = "";
+            } else {
+                rows[i].style.display = "none";
+            }
         }
-    }
+    });
 }
 
-function sortTable() {
-    const table = document.getElementById('task-table').getElementsByTagName('tbody')[0];
+function sortTable(table) {
     const rows = Array.from(table.rows);
 
     rows.sort((a, b) => {
@@ -207,7 +216,6 @@ function sortTable() {
         return priorityA - priorityB;
     });
 
-    // 並べ替えた行をテーブルに追加
     rows.forEach(row => table.appendChild(row));
 }
 
@@ -221,10 +229,14 @@ function getAssigneeColor(assignee) {
 }
 
 function toggleMessageContainer(index) {
-    const table = document.getElementById('task-table').getElementsByTagName('tbody')[0];
-    const row = table.rows[index];
-    const messageContainer = row.querySelector('.message-container');
-    messageContainer.style.display = messageContainer.style.display === 'none' ? 'block' : 'none';
+    const tables = ['labor-task-table', 'general-task-table'];
+
+    tables.forEach(tableId => {
+        const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+        const row = table.rows[index];
+        const messageContainer = row.querySelector('.message-container');
+        messageContainer.style.display = messageContainer.style.display === 'none' ? 'block' : 'none';
+    });
 }
 
 function sendMessage(message, container, sender) {
