@@ -99,7 +99,7 @@ function addCells(row, task, progress, status, priority, deadline, assignee, sen
     messageContainer.appendChild(messageForm);
     actionsCell.appendChild(messageContainer);
 
-    updateRowStyle(row, progress, deadline);
+    updateRowStyle(row, progress, status, deadline);
 }
 
 function updateCells(row, task, progress, status, priority, deadline, assignee, sender) {
@@ -119,28 +119,32 @@ function updateCells(row, task, progress, status, priority, deadline, assignee, 
 
     row.cells[5].className = getAssigneeColor(assignee);
 
-    updateRowStyle(row, progress, deadline);
+    updateRowStyle(row, progress, status, deadline);
 }
 
-function updateRowStyle(row, progress, deadline) {
-    row.classList.remove('category-high', 'category-medium', 'category-low', 'warning', 'overdue');
-    if (progress >= 75) {
-        row.classList.add('category-high');
-    } else if (progress >= 50) {
-        row.classList.add('category-medium');
+function updateRowStyle(row, progress, status, deadline) {
+    row.classList.remove('category-high', 'category-medium', 'category-low', 'warning', 'overdue', 'completed');
+    if (status === '完了') {
+        row.classList.add('completed');
     } else {
-        row.classList.add('category-low');
-    }
+        if (progress >= 75) {
+            row.classList.add('category-high');
+        } else if (progress >= 50) {
+            row.classList.add('category-medium');
+        } else {
+            row.classList.add('category-low');
+        }
 
-    const today = new Date();
-    const deadlineDate = new Date(deadline);
-    const timeDiff = deadlineDate.getTime() - today.getTime();
-    const dayDiff = timeDiff / (1000 * 3600 * 24);
+        const today = new Date();
+        const deadlineDate = new Date(deadline);
+        const timeDiff = deadlineDate.getTime() - today.getTime();
+        const dayDiff = timeDiff / (1000 * 3600 * 24);
 
-    if (dayDiff <= 3 && dayDiff >= 0) {
-        row.classList.add('warning');
-    } else if (dayDiff < 0) {
-        row.classList.add('overdue');
+        if (dayDiff <= 3 && dayDiff >= 0) {
+            row.classList.add('warning');
+        } else if (dayDiff < 0) {
+            row.classList.add('overdue');
+        }
     }
 }
 
@@ -199,8 +203,9 @@ function filterTasks() {
 
         for (let i = 0; i < rows.length; i++) {
             const cells = rows[i].getElementsByTagName('td');
-            let taskName = cells[0].textContent.toLowerCase();
-            if (taskName.indexOf(searchInput) > -1) {
+            const taskName = cells[0].textContent.toLowerCase();
+            const assigneeName = cells[5].textContent.toLowerCase();
+            if (taskName.indexOf(searchInput) > -1 || assigneeName.indexOf(searchInput) > -1) {
                 rows[i].style.display = "";
             } else {
                 rows[i].style.display = "none";
@@ -213,9 +218,16 @@ function sortTable(table) {
     const rows = Array.from(table.rows);
 
     rows.sort((a, b) => {
-        const priorityA = ['高', '中', '低'].indexOf(a.cells[3].textContent);
-        const priorityB = ['高', '中', '低'].indexOf(b.cells[3].textContent);
-        return priorityA - priorityB;
+        const statusA = a.cells[2].textContent === '完了' ? 1 : 0;
+        const statusB = b.cells[2].textContent === '完了' ? 1 : 0;
+
+        if (statusA !== statusB) {
+            return statusA - statusB;
+        }
+
+        const deadlineA = new Date(a.cells[4].textContent);
+        const deadlineB = new Date(b.cells[4].textContent);
+        return deadlineA - deadlineB;
     });
 
     rows.forEach(row => table.appendChild(row));
