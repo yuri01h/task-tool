@@ -1,4 +1,137 @@
-} else {
+document.getElementById('task-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const category = document.getElementById('category').value;
+    const task = document.getElementById('task').value;
+    const progress = document.getElementById('progress').value;
+    const status = document.getElementById('status').value;
+    const priority = document.getElementById('priority').value;
+    const deadline = document.getElementById('deadline').value;
+    const assignee = document.getElementById('assignee').value;
+    const sender = document.getElementById('sender').value;
+    const editIndex = document.getElementById('edit-index').value;
+
+    const tableId = category === '労務' ? 'labor-task-table' : 'general-task-table';
+    const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+
+    if (editIndex === '') {
+        const newRow = table.insertRow();
+        addCells(newRow, task, progress, status, priority, deadline, assignee, sender);
+    } else {
+        const row = table.rows[editIndex];
+        updateCells(row, task, progress, status, priority, deadline, assignee, sender);
+        document.getElementById('edit-index').value = '';
+    }
+
+    sortTable(table);
+    document.getElementById('task-form').reset();
+    checkWarnings();
+});
+
+function addCells(row, task, progress, status, priority, deadline, assignee, sender) {
+    const taskCell = row.insertCell(0);
+    const progressCell = row.insertCell(1);
+    const statusCell = row.insertCell(2);
+    const priorityCell = row.insertCell(3);
+    const deadlineCell = row.insertCell(4);
+    const assigneeCell = row.insertCell(5);
+    const actionsCell = row.insertCell(6);
+
+    taskCell.textContent = task;
+
+    const progressBar = document.createElement('div');
+    progressBar.className = 'progress-bar';
+    progressBar.style.width = progress + '%';
+    progressBar.textContent = progress + '%';
+    progressCell.textContent = progress + '%';
+    progressCell.appendChild(progressBar);
+
+    statusCell.textContent = status;
+    priorityCell.textContent = ['高', '中', '低'][priority - 1];
+    deadlineCell.textContent = deadline;
+    assigneeCell.textContent = assignee;
+
+    assigneeCell.className = getAssigneeColor(assignee);
+
+    const editButton = document.createElement('button');
+    editButton.textContent = '編集';
+    editButton.className = 'edit-button';
+    editButton.onclick = function() {
+        editTask(row.rowIndex - 1, row.parentNode.parentNode.id);
+    };
+    actionsCell.appendChild(editButton);
+
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = '削除';
+    deleteButton.className = 'delete-button';
+    deleteButton.onclick = function() {
+        deleteTask(row.rowIndex - 1, row.parentNode.parentNode.id);
+    };
+    actionsCell.appendChild(deleteButton);
+
+    const messageButton = document.createElement('button');
+    messageButton.textContent = 'メッセージ';
+    messageButton.className = 'message-button';
+    messageButton.onclick = function() {
+        toggleMessageContainer(row.rowIndex - 1, row.parentNode.parentNode.id);
+    };
+    actionsCell.appendChild(messageButton);
+
+    const messageContainer = document.createElement('div');
+    messageContainer.className = 'message-container';
+    const messageHeader = document.createElement('div');
+    messageHeader.className = 'message-header';
+    messageHeader.textContent = 'メッセージ';
+
+    const messageForm = document.createElement('div');
+    messageForm.className = 'message-form';
+    const messageTextarea = document.createElement('textarea');
+    messageTextarea.placeholder = 'ここにメッセージを入力...';
+    const sendMessageButton = document.createElement('button');
+    sendMessageButton.textContent = '送信';
+    sendMessageButton.onclick = function() {
+        sendMessage(messageTextarea.value, messageContainer, sender);
+    };
+
+    messageForm.appendChild(messageTextarea);
+    messageForm.appendChild(sendMessageButton);
+    messageContainer.appendChild(messageHeader);
+    messageContainer.appendChild(messageForm);
+    actionsCell.appendChild(messageContainer);
+
+    updateRowStyle(row, progress, status, deadline);
+}
+
+function updateCells(row, task, progress, status, priority, deadline, assignee, sender) {
+    row.cells[0].textContent = task;
+
+    const progressBar = row.cells[1].querySelector('.progress-bar');
+    progressBar.style.width = progress + '%';
+    progressBar.textContent = progress + '%';
+
+    row.cells[1].textContent = progress + '%';
+    row.cells[1].appendChild(progressBar);
+
+    row.cells[2].textContent = status;
+    row.cells[3].textContent = ['高', '中', '低'][priority - 1];
+    row.cells[4].textContent = deadline;
+    row.cells[5].textContent = assignee;
+
+    row.cells[5].className = getAssigneeColor(assignee);
+
+    updateRowStyle(row, progress, status, deadline);
+}
+
+function updateRowStyle(row, progress, status, deadline) {
+    row.classList.remove('category-high', 'category-medium', 'category-low', 'warning', 'overdue', 'completed');
+    if (status === '完了') {
+        row.classList.add('completed');
+    } else {
+        if (progress >= 75) {
+            row.classList.add('category-high');
+        } else if (progress >= 50) {
+            row.classList.add('category-medium');
+        } else {
             row.classList.add('category-low');
         }
 
