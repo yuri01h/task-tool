@@ -1,107 +1,53 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>タスク管理表</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div class="container">
-        <h1>タスク管理表</h1>
-        <form id="task-form">
-            <input type="hidden" id="edit-index">
-            <label for="new-category">
-                新しい大項目:
-                <input type="text" id="new-category" name="new-category">
-            </label>
-            <button type="button" onclick="addCategory()">大項目追加</button>
-            <label for="category">
+        < h1 >タスク管理表</ h1 >
+        <フォーム id ="タスクフォーム" >
+            <入力 タイプ="非表示" id ="編集インデックス" >
+            <ラベル = " new-category " >
+                新しい主要項目:
+                <入力 タイプ="テキスト" id ="新しいカテゴリ"名前="新しいカテゴリ" >
+            </ラベル>
+            < button  type =" button " onclick =" addCategory() " >大項目の追加</ button >
+            <ラベル = "カテゴリ" >
                 大項目:
-                <select id="category" name="category" required>
-                    <option value="労務">労務</option>
-                    <option value="総務">総務</option>
-                </select>
-            </label>
-            <label for="task">
+                < select  id =" category " name =" category "必須>
+                    < option  value ="労務" >労務</ option >
+                    < option  value ="総務" >総務</ option >
+                </選択>
+            </ラベル>
+            <ラベル = "タスク" >
                 タスク:
-                <input type="text" id="task" name="task" required>
-            </label>
-            <label for="progress">
-                進捗 (%):
-                <input type="number" id="progress" name="progress" min="0" max="100" required>
-            </label>
-            <label for="status">
+                < input  type =" text " id =" task " name =" task "必須>
+            </ラベル>
+            <ラベル = " progress " >
+                進捗率 (%):
+                <入力 タイプ="数値" id ="進捗"名前="進捗"最小=" 0 "最大=" 100 "必須>
+            </ラベル>
+            <ラベル = "ステータス" >
                 ステータス:
-                <select id="status" name="status" required>
-                    <option value="未着手">未着手</option>
-                    <option value="進行中">進行中</option>
-                    <option value="完了">完了</option>
-                </select>
-            </label>
-            <label for="priority">
+                < id =" status " name =" status "を選択する 必要があります>
+                    < option  value ="未着手" >未着手</ option >
+                    <オプション 値="進行中" >進行中</オプション>
+                    <オプション 値="完了" >完了</オプション>
+                </選択>
+            </ラベル>
+            <ラベル = "優先度" >
                 優先順位:
-                <select id="priority" name="priority" required>
-                    <option value="1">高</option>
-                    <option value="2">中</option>
-                    <option value="3">低</option>
-                </select>
-            </label>
-            <label for="deadline">
-                期日:
-                <input type="date" id="deadline" name="deadline" required>
-            </label>
-            <label for="assignee">
+                < select  id =" priority " name =" priority "必須>
+                    <オプション 値=" 1 " >高</オプション>
+                    <オプション 値=" 2 " >中</オプション>
+                    <オプション 値=" 3 " >低</オプション>
+                </選択>
+            </ラベル>
+            <ラベル = "期限" >
+                日付:
+                < input  type =" date " id =" deadline " name =" deadline "必須>
+            </ラベル>
+            <ラベル = "譲受人" >
                 担当者:
-                <input type="text" id="assignee" name="assignee" required>
-            </label>
-            <label for="sender">
+                < input  type =" text " id =" assignmentee " name =" assignmentee "必須>
+            </ラベル>
+            <ラベル = "送信者" >
                 送信者:
-                <input type="text" id="sender" name="sender" required>
-            </label>
-            <button type="submit">追加</button>
-        </form>
-
-        <input type="text" id="search" name="search" placeholder="タスクまたは担当者を検索..." onkeyup="filterTasks()">
-
-        <p id="warning-message" class="warning-message">3日以内に期日が迫っているタスクがあります！</p>
-
-        <div id="task-sections">
-            <h2>労務</h2>
-            <table id="labor-task-table">
-                <thead>
-                    <tr>
-                        <th>タスク</th>
-                        <th>進捗</th>
-                        <th>ステータス</th>
-                        <th>優先順位</th>
-                        <th>期日</th>
-                        <th>担当者</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-
-            <h2>総務</h2>
-            <table id="general-task-table">
-                <thead>
-                    <tr>
-                        <th>タスク</th>
-                        <th>進捗</th>
-                        <th>ステータス</th>
-                        <th>優先順位</th>
-                        <th>期日</th>
-                        <th>担当者</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <script src="script.js"></script>
-</body>
-</html>
+                < input  type =" text " id =" sender " name =" sender "必須>
+            </ラベル>
+            < button  type =" submit " >追加</ button >
+        </フォーム>
