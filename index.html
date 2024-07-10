@@ -10,6 +10,9 @@
     <h1>タスク管理表</h1>
     <form id="task-form">
         <input type="hidden" id="edit-index">
+        <label for="new-category">新しい大項目:</label>
+        <input type="text" id="new-category" name="new-category">
+        <button type="button" onclick="addCategory()">大項目追加</button>
         <label for="category">大項目:</label>
         <select id="category" name="category" required>
             <option value="労務">労務</option>
