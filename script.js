@@ -36,6 +36,7 @@ function addCategory() {
         newOption.value = newCategory;
         newOption.text = newCategory;
         categorySelect.appendChild(newOption);
+        categorySelect.value = newCategory;
         document.getElementById('new-category').value = '';
 
         // 新しい大項目のテーブルを作成
