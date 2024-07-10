@@ -37,6 +37,32 @@ function addCategory() {
         newOption.text = newCategory;
         categorySelect.appendChild(newOption);
         document.getElementById('new-category').value = '';
+
+        // 新しい大項目のテーブルを作成
+        const taskSections = document.getElementById('task-sections');
+        const newSection = document.createElement('div');
+        const newSectionTitle = document.createElement('h2');
+        newSectionTitle.textContent = newCategory;
+        newSection.appendChild(newSectionTitle);
+
+        const newTable = document.createElement('table');
+        newTable.id = `${newCategory}-task-table`;
+        newTable.innerHTML = `
+            <thead>
+                <tr>
+                    <th>タスク</th>
+                    <th>進捗</th>
+                    <th>ステータス</th>
+                    <th>優先順位</th>
+                    <th>期日</th>
+                    <th>担当者</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        `;
+        newSection.appendChild(newTable);
+        taskSections.appendChild(newSection);
     }
 }
 
@@ -47,7 +73,7 @@ function getTableId(category) {
         case '総務':
             return 'general-task-table';
         default:
-            return category + '-task-table';
+            return `${category}-task-table`;
     }
 }
 
