@@ -3,70 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>タスク管理表</title>
+    <title>タスク管理システム</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>タスク管理表</h1>
-        <form id="task-form">
-            <input type="hidden" id="edit-index">
-            <label for="new-category">
-                新しい大項目:
-                <input type="text" id="new-category" name="new-category">
-            </label>
-            <button type="button" onclick="addCategory()">大項目追加</button>
-            <label for="category">
-                大項目:
-                <select id="category" name="category" required>
-                    <option value="労務">労務</option>
-                    <option value="総務">総務</option>
-                </select>
-            </label>
-            <label for="task">
-                タスク:
-                <input type="text" id="task" name="task" required>
-            </label>
-            <label for="progress">
-                進捗 (%):
-                <input type="number" id="progress" name="progress" min="0" max="100" required>
-            </label>
-            <label for="status">
-                ステータス:
-                <select id="status" name="status" required>
-                    <option value="未着手">未着手</option>
-                    <option value="進行中">進行中</option>
-                    <option value="完了">完了</option>
-                </select>
-            </label>
-            <label for="priority">
-                優先順位:
-                <select id="priority" name="priority" required>
-                    <option value="1">高</option>
-                    <option value="2">中</option>
-                    <option value="3">低</option>
-                </select>
-            </label>
-            <label for="deadline">
-                期日:
-                <input type="date" id="deadline" name="deadline" required>
-            </label>
-            <label for="assignee">
-                担当者:
-                <input type="text" id="assignee" name="assignee" required>
-            </label>
-            <label for="sender">
-                送信者:
-                <input type="text" id="sender" name="sender" required>
-            </label>
-            <button type="submit">追加</button>
-        </form>
+    <h1>タスク管理システム</h1>
+    <form id="task-form">
+        <label for="category">カテゴリー:</label>
+        <select id="category">
+            <option value="労務">労務</option>
+            <option value="総務">総務</option>
+        </select>
 
-        <input type="text" id="search" name="search" placeholder="タスクまたは担当者を検索..." onkeyup="filterTasks()">
+        <label for="new-category">新しいカテゴリーを追加:</label>
+        <input type="text" id="new-category">
+        <button type="button" onclick="addCategory()">追加</button>
 
-        <p id="warning-message" class="warning-message">3日以内に期日が迫っているタスクがあります！</p>
+        <label for="task">タスク:</label>
+        <input type="text" id="task">
 
-        <div id="task-sections">
+        <label for="progress">進捗(%):</label>
+        <input type="number" id="progress" min="0" max="100">
+
+        <label for="status">ステータス:</label>
+        <select id="status">
+            <option value="未着手">未着手</option>
+            <option value="進行中">進行中</option>
+            <option value="完了">完了</option>
+        </select>
+
+        <label for="priority">優先順位:</label>
+        <select id="priority">
+            <option value="1">高</option>
+            <option value="2">中</option>
+            <option value="3">低</option>
+        </select>
+
+        <label for="deadline">期日:</label>
+        <input type="date" id="deadline">
+
+        <label for="assignee">担当者:</label>
+        <input type="text" id="assignee">
+
+        <label for="sender">送信者:</label>
+        <input type="text" id="sender">
+
+        <input type="hidden" id="edit-index">
+        <button type="submit">タスクを追加</button>
+    </form>
+
+    <input type="text" id="search" placeholder="タスクや担当者を検索..." onkeyup="filterTasks()">
+
+    <div id="task-sections">
+        <div>
             <h2>労務</h2>
             <table id="labor-task-table">
                 <thead>
@@ -80,10 +69,10 @@
                         <th>操作</th>
                     </tr>
                 </thead>
-                <tbody>
-                </tbody>
+                <tbody></tbody>
             </table>
-
+        </div>
+        <div>
             <h2>総務</h2>
             <table id="general-task-table">
                 <thead>
@@ -97,11 +86,13 @@
                         <th>操作</th>
                     </tr>
                 </thead>
-                <tbody>
-                </tbody>
+                <tbody></tbody>
             </table>
         </div>
     </div>
+
+    <div id="warning-message" class="warning-message" style="display:none;">期日が近いタスクがあります！</div>
+
     <script src="script.js"></script>
 </body>
 </html>
