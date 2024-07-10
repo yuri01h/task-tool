@@ -29,17 +29,14 @@ document.getElementById('task-form').addEventListener('submit', function(event) 
 });
 
 function addCategory() {
-    const newCategory = document.getElementById('new-category').value;
+    const newCategory = document.getElementById('new-category').value.trim();
     if (newCategory) {
         const categorySelect = document.getElementById('category');
-        const newOption = document.createElement('option');
-        newOption.value = newCategory;
-        newOption.text = newCategory;
-        categorySelect.appendChild(newOption);
+        const newOption = new Option(newCategory, newCategory);
+        categorySelect.add(newOption);
         categorySelect.value = newCategory;
         document.getElementById('new-category').value = '';
 
-        // 新しい大項目のテーブルを作成
         const taskSections = document.getElementById('task-sections');
         const newSection = document.createElement('div');
         const newSectionTitle = document.createElement('h2');
@@ -79,122 +76,57 @@ function getTableId(category) {
 }
 
 function addCells(row, task, progress, status, priority, deadline, assignee, sender) {
-    const taskCell = row.insertCell(0);
-    const progressCell = row.insertCell(1);
-    const statusCell = row.insertCell(2);
-    const priorityCell = row.insertCell(3);
-    const deadlineCell = row.insertCell(4);
-    const assigneeCell = row.insertCell(5);
-    const actionsCell = row.insertCell(6);
-
-    taskCell.textContent = task;
-
-    const progressBar = document.createElement('div');
-    progressBar.className = 'progress-bar';
-    progressBar.style.width = progress + '%';
-    progressBar.textContent = progress + '%';
-    progressCell.textContent = progress + '%';
-    progressCell.appendChild(progressBar);
-
-    statusCell.textContent = status;
-    priorityCell.textContent = ['高', '中', '低'][priority - 1];
-    deadlineCell.textContent = deadline;
-    assigneeCell.textContent = assignee;
-
-    assigneeCell.className = getAssigneeColor(assignee);
-
-    const editButton = document.createElement('button');
-    editButton.textContent = '編集';
-    editButton.className = 'edit-button';
-    editButton.onclick = function() {
-        editTask(row.rowIndex - 1, row.parentNode.parentNode.id);
-    };
-    actionsCell.appendChild(editButton);
-
-    const deleteButton = document.createElement('button');
-    deleteButton.textContent = '削除';
-    deleteButton.className = 'delete-button';
-    deleteButton.onclick = function() {
-        deleteTask(row.rowIndex - 1, row.parentNode.parentNode.id);
-    };
-    actionsCell.appendChild(deleteButton);
-
-    const messageButton = document.createElement('button');
-    messageButton.textContent = 'メッセージ';
-    messageButton.className = 'message-button';
-    messageButton.onclick = function() {
-        toggleMessageContainer(row.rowIndex - 1, row.parentNode.parentNode.id);
-    };
-    actionsCell.appendChild(messageButton);
-
-    const messageContainer = document.createElement('div');
-    messageContainer.className = 'message-container';
-    const messageHeader = document.createElement('div');
-    messageHeader.className = 'message-header';
-    messageHeader.textContent = 'メッセージ';
-
-    const messageForm = document.createElement('div');
-    messageForm.className = 'message-form';
-    const messageTextarea = document.createElement('textarea');
-    messageTextarea.placeholder = 'ここにメッセージを入力...';
-    const sendMessageButton = document.createElement('button');
-    sendMessageButton.textContent = '送信';
-    sendMessageButton.onclick = function() {
-        sendMessage(messageTextarea.value, messageContainer, sender);
-    };
-
-    messageForm.appendChild(messageTextarea);
-    messageForm.appendChild(sendMessageButton);
-    messageContainer.appendChild(messageHeader);
-    messageContainer.appendChild(messageForm);
-    actionsCell.appendChild(messageContainer);
-
+    row.innerHTML = `
+        <td>${task}</td>
+        <td>${progress}%<div class="progress-bar" style="width: ${progress}%">${progress}%</div></td>
+        <td>${status}</td>
+        <td>${['高', '中', '低'][priority - 1]}</td>
+        <td>${deadline}</td>
+        <td style="${getAssigneeColor(assignee)}">${assignee}</td>
+        <td>
+            <button class="edit-button" onclick="editTask(${row.rowIndex - 1}, '${row.parentNode.parentNode.id}')">編集</button>
+            <button class="delete-button" onclick="deleteTask(${row.rowIndex - 1}, '${row.parentNode.parentNode.id}')">削除</button>
+            <button class="message-button" onclick="toggleMessageContainer(${row.rowIndex - 1}, '${row.parentNode.parentNode.id}')">メッセージ</button>
+            <div class="message-container">
+                <div class="message-header">メッセージ</div>
+                <div class="message-form">
+                    <textarea placeholder="ここにメッセージを入力..."></textarea>
+                    <button onclick="sendMessage(this.previousElementSibling.value, this.parentNode.parentNode, '${sender}')">送信</button>
+                </div>
+                <ul class="message-list"></ul>
+            </div>
+        </td>
+    `;
     updateRowStyle(row, progress, status, deadline);
 }
 
 function updateCells(row, task, progress, status, priority, deadline, assignee, sender) {
     row.cells[0].textContent = task;
-
-    const progressBar = row.cells[1].querySelector('.progress-bar');
-    progressBar.style.width = progress + '%';
-    progressBar.textContent = progress + '%';
-
-    row.cells[1].textContent = progress + '%';
-    row.cells[1].appendChild(progressBar);
-
+    row.cells[1].innerHTML = `${progress}%<div class="progress-bar" style="width: ${progress}%">${progress}%</div>`;
     row.cells[2].textContent = status;
     row.cells[3].textContent = ['高', '中', '低'][priority - 1];
     row.cells[4].textContent = deadline;
+    row.cells[5].style = getAssigneeColor(assignee);
     row.cells[5].textContent = assignee;
-
-    row.cells[5].className = getAssigneeColor(assignee);
-
     updateRowStyle(row, progress, status, deadline);
 }
 
 function updateRowStyle(row, progress, status, deadline) {
-    row.classList.remove('category-high', 'category-medium', 'category-low', 'warning', 'overdue', 'completed');
+    row.className = '';
     if (status === '完了') {
         row.classList.add('completed');
     } else {
-        if (progress >= 75) {
-            row.classList.add('category-high');
-        } else if (progress >= 50) {
-            row.classList.add('category-medium');
-        } else {
-            row.classList.add('category-low');
-        }
+        if (progress >= 75) row.classList.add('category-high');
+        else if (progress >= 50) row.classList.add('category-medium');
+        else row.classList.add('category-low');
 
         const today = new Date();
         const deadlineDate = new Date(deadline);
-        const timeDiff = deadlineDate.getTime() - today.getTime();
+        const timeDiff = deadlineDate - today;
         const dayDiff = timeDiff / (1000 * 3600 * 24);
 
-        if (dayDiff <= 3 && dayDiff >= 0) {
-            row.classList.add('warning');
-        } else if (dayDiff < 0) {
-            row.classList.add('overdue');
-        }
+        if (dayDiff <= 3 && dayDiff >= 0) row.classList.add('warning');
+        else if (dayDiff < 0) row.classList.add('overdue');
     }
 }
 
@@ -203,27 +135,17 @@ function checkWarnings() {
     let hasWarning = false;
 
     tables.forEach(tableId => {
-        const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
-        const rows = table.getElementsByTagName('tr');
-
-        for (let i = 0; i < rows.length; i++) {
-            if (rows[i].classList.contains('warning') || rows[i].classList.contains('overdue')) {
-                hasWarning = true;
-                break;
-            }
-        }
+        const rows = document.getElementById(tableId).querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            if (row.classList.contains('warning') || row.classList.contains('overdue')) hasWarning = true;
+        });
     });
 
-    if (hasWarning) {
-        document.getElementById('warning-message').style.display = 'block';
-    } else {
-        document.getElementById('warning-message').style.display = 'none';
-    }
+    document.getElementById('warning-message').style.display = hasWarning ? 'block' : 'none';
 }
 
 function editTask(index, tableId) {
-    const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
-    const row = table.rows[index];
+    const row = document.getElementById(tableId).rows[index + 1]; // +1 because of the header row
 
     document.getElementById('category').value = tableId === 'labor-task-table' ? '労務' : '総務';
     document.getElementById('task').value = row.cells[0].textContent;
@@ -237,8 +159,7 @@ function editTask(index, tableId) {
 }
 
 function deleteTask(index, tableId) {
-    const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
-    table.deleteRow(index);
+    document.getElementById(tableId).deleteRow(index + 1); // +1 because of the header row
     document.getElementById('edit-index').value = '';
     checkWarnings();
 }
@@ -248,32 +169,23 @@ function filterTasks() {
     const tables = ['labor-task-table', 'general-task-table'];
 
     tables.forEach(tableId => {
-        const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
-        const rows = table.getElementsByTagName('tr');
-
-        for (let i = 0; i < rows.length; i++) {
-            const cells = rows[i].getElementsByTagName('td');
-            const taskName = cells[0].textContent.toLowerCase();
-            const assigneeName = cells[5].textContent.toLowerCase();
-            if (taskName.indexOf(searchInput) > -1 || assigneeName.indexOf(searchInput) > -1) {
-                rows[i].style.display = "";
-            } else {
-                rows[i].style.display = "none";
-            }
-        }
+        const rows = document.getElementById(tableId).querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            const taskName = row.cells[0].textContent.toLowerCase();
+            const assigneeName = row.cells[5].textContent.toLowerCase();
+            row.style.display = taskName.includes(searchInput) || assigneeName.includes(searchInput) ? '' : 'none';
+        });
     });
 }
 
 function sortTable(table) {
-    const rows = Array.from(table.rows);
+    const rows = Array.from(table.rows).slice(1); // exclude header row
 
     rows.sort((a, b) => {
         const statusA = a.cells[2].textContent === '完了' ? 1 : 0;
         const statusB = b.cells[2].textContent === '完了' ? 1 : 0;
 
-        if (statusA !== statusB) {
-            return statusA - statusB;
-        }
+        if (statusA !== statusB) return statusA - statusB;
 
         const deadlineA = new Date(a.cells[4].textContent);
         const deadlineB = new Date(b.cells[4].textContent);
@@ -284,17 +196,13 @@ function sortTable(table) {
 }
 
 function getAssigneeColor(assignee) {
-    const assigneeHash = assignee.split('').reduce((hash, char) => {
-        return char.charCodeAt(0) + ((hash << 5) - hash);
-    }, 0);
-
+    const assigneeHash = assignee.split('').reduce((hash, char) => char.charCodeAt(0) + ((hash << 5) - hash), 0);
     const color = `hsl(${assigneeHash % 360}, 70%, 80%)`;
     return `background-color: ${color};`;
 }
 
 function toggleMessageContainer(index, tableId) {
-    const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
-    const row = table.rows[index];
+    const row = document.getElementById(tableId).rows[index + 1]; // +1 because of the header row
     const messageContainer = row.querySelector('.message-container');
     messageContainer.style.display = messageContainer.style.display === 'none' ? 'block' : 'none';
 }
@@ -302,15 +210,10 @@ function toggleMessageContainer(index, tableId) {
 function sendMessage(message, container, sender) {
     if (message && sender) {
         const messageList = container.querySelector('.message-list');
-        if (!messageList) {
-            const newMessageList = document.createElement('ul');
-            newMessageList.className = 'message-list';
-            container.appendChild(newMessageList);
-        }
         const newMessage = document.createElement('li');
         newMessage.className = 'sender';
         newMessage.textContent = `${sender}: ${message}`;
-        container.querySelector('.message-list').appendChild(newMessage);
+        messageList.appendChild(newMessage);
         container.querySelector('textarea').value = '';
     } else {
         alert('メッセージと送信者を入力してください。');
