@@ -17,7 +17,7 @@ form, .message-form {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    max-width: 800px;
+    max-width: 1200px; /* 横幅を広く設定 */
     margin: 20px auto;
 }
 
@@ -59,7 +59,7 @@ form button:hover, .message-form button:hover {
 
 table {
     width: 100%;
-    max-width: 800px;
+    max-width: 1200px; /* 横幅を広く設定 */
     margin: 20px auto;
     border-collapse: collapse;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -141,7 +141,7 @@ tr:nth-child(even) {
 }
 
 .message-form {
-    max-width: 800px;
+    max-width: 1200px; /* 横幅を広く設定 */
     margin: 20px auto;
 }
 
@@ -165,7 +165,7 @@ tr:nth-child(even) {
     border-radius: 4px;
     padding: 10px;
     background: #fff;
-    max-width: 800px;
+    max-width: 1200px; /* 横幅を広く設定 */
 }
 
 .message-list {
