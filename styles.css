@@ -42,11 +42,11 @@ form label {
     margin-top: 10px;
     font-weight: bold;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
 }
 
 form input, form select, form button {
-    width: calc(100% - 22px);
+    width: 100%;
     padding: 12px;
     margin-top: 5px;
     border: 1px solid #ddd;
@@ -61,7 +61,6 @@ form button {
     border: none;
     cursor: pointer;
     margin-top: 20px;
-    width: 100%;
 }
 
 form button:hover {
