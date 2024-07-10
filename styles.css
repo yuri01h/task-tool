@@ -42,7 +42,7 @@ form label {
     margin-top: 10px;
     font-weight: bold;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
 }
 
 form input, form select, form button {
