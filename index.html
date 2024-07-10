@@ -1,318 +1,107 @@
-document.getElementById('task-form').addEventListener('submit', function(event) {
-    event.preventDefault();
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>タスク管理表</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>タスク管理表</h1>
+        <form id="task-form">
+            <input type="hidden" id="edit-index">
+            <label for="new-category">
+                新しい大項目:
+                <input type="text" id="new-category" name="new-category">
+            </label>
+            <button type="button" onclick="addCategory()">大項目追加</button>
+            <label for="category">
+                大項目:
+                <select id="category" name="category" required>
+                    <option value="労務">労務</option>
+                    <option value="総務">総務</option>
+                </select>
+            </label>
+            <label for="task">
+                タスク:
+                <input type="text" id="task" name="task" required>
+            </label>
+            <label for="progress">
+                進捗 (%):
+                <input type="number" id="progress" name="progress" min="0" max="100" required>
+            </label>
+            <label for="status">
+                ステータス:
+                <select id="status" name="status" required>
+                    <option value="未着手">未着手</option>
+                    <option value="進行中">進行中</option>
+                    <option value="完了">完了</option>
+                </select>
+            </label>
+            <label for="priority">
+                優先順位:
+                <select id="priority" name="priority" required>
+                    <option value="1">高</option>
+                    <option value="2">中</option>
+                    <option value="3">低</option>
+                </select>
+            </label>
+            <label for="deadline">
+                期日:
+                <input type="date" id="deadline" name="deadline" required>
+            </label>
+            <label for="assignee">
+                担当者:
+                <input type="text" id="assignee" name="assignee" required>
+            </label>
+            <label for="sender">
+                送信者:
+                <input type="text" id="sender" name="sender" required>
+            </label>
+            <button type="submit">追加</button>
+        </form>
 
-    const category = document.getElementById('category').value;
-    const task = document.getElementById('task').value;
-    const progress = document.getElementById('progress').value;
-    const status = document.getElementById('status').value;
-    const priority = document.getElementById('priority').value;
-    const deadline = document.getElementById('deadline').value;
-    const assignee = document.getElementById('assignee').value;
-    const sender = document.getElementById('sender').value;
-    const editIndex = document.getElementById('edit-index').value;
+        <input type="text" id="search" name="search" placeholder="タスクまたは担当者を検索..." onkeyup="filterTasks()">
 
-    const tableId = getTableId(category);
-    const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+        <p id="warning-message" class="warning-message">3日以内に期日が迫っているタスクがあります！</p>
 
-    if (editIndex === '') {
-        const newRow = table.insertRow();
-        addCells(newRow, task, progress, status, priority, deadline, assignee, sender);
-    } else {
-        const row = table.rows[editIndex];
-        updateCells(row, task, progress, status, priority, deadline, assignee, sender);
-        document.getElementById('edit-index').value = '';
-    }
+        <div id="task-sections">
+            <h2>労務</h2>
+            <table id="labor-task-table">
+                <thead>
+                    <tr>
+                        <th>タスク</th>
+                        <th>進捗</th>
+                        <th>ステータス</th>
+                        <th>優先順位</th>
+                        <th>期日</th>
+                        <th>担当者</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
 
-    sortTable(table);
-    document.getElementById('task-form').reset();
-    checkWarnings();
-});
-
-function addCategory() {
-    const newCategory = document.getElementById('new-category').value;
-    if (newCategory) {
-        const categorySelect = document.getElementById('category');
-        const newOption = document.createElement('option');
-        newOption.value = newCategory;
-        newOption.text = newCategory;
-        categorySelect.appendChild(newOption);
-        categorySelect.value = newCategory;
-        document.getElementById('new-category').value = '';
-
-        // 新しい大項目のテーブルを作成
-        const taskSections = document.getElementById('task-sections');
-        const newSection = document.createElement('div');
-        const newSectionTitle = document.createElement('h2');
-        newSectionTitle.textContent = newCategory;
-        newSection.appendChild(newSectionTitle);
-
-        const newTable = document.createElement('table');
-        newTable.id = `${newCategory}-task-table`;
-        newTable.innerHTML = `
-            <thead>
-                <tr>
-                    <th>タスク</th>
-                    <th>進捗</th>
-                    <th>ステータス</th>
-                    <th>優先順位</th>
-                    <th>期日</th>
-                    <th>担当者</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        `;
-        newSection.appendChild(newTable);
-        taskSections.appendChild(newSection);
-    }
-}
-
-function getTableId(category) {
-    switch (category) {
-        case '労務':
-            return 'labor-task-table';
-        case '総務':
-            return 'general-task-table';
-        default:
-            return `${category}-task-table`;
-    }
-}
-
-function addCells(row, task, progress, status, priority, deadline, assignee, sender) {
-    const taskCell = row.insertCell(0);
-    const progressCell = row.insertCell(1);
-    const statusCell = row.insertCell(2);
-    const priorityCell = row.insertCell(3);
-    const deadlineCell = row.insertCell(4);
-    const assigneeCell = row.insertCell(5);
-    const actionsCell = row.insertCell(6);
-
-    taskCell.textContent = task;
-
-    const progressBar = document.createElement('div');
-    progressBar.className = 'progress-bar';
-    progressBar.style.width = progress + '%';
-    progressBar.textContent = progress + '%';
-    progressCell.textContent = progress + '%';
-    progressCell.appendChild(progressBar);
-
-    statusCell.textContent = status;
-    priorityCell.textContent = ['高', '中', '低'][priority - 1];
-    deadlineCell.textContent = deadline;
-    assigneeCell.textContent = assignee;
-
-    assigneeCell.className = getAssigneeColor(assignee);
-
-    const editButton = document.createElement('button');
-    editButton.textContent = '編集';
-    editButton.className = 'edit-button';
-    editButton.onclick = function() {
-        editTask(row.rowIndex - 1, row.parentNode.parentNode.id);
-    };
-    actionsCell.appendChild(editButton);
-
-    const deleteButton = document.createElement('button');
-    deleteButton.textContent = '削除';
-    deleteButton.className = 'delete-button';
-    deleteButton.onclick = function() {
-        deleteTask(row.rowIndex - 1, row.parentNode.parentNode.id);
-    };
-    actionsCell.appendChild(deleteButton);
-
-    const messageButton = document.createElement('button');
-    messageButton.textContent = 'メッセージ';
-    messageButton.className = 'message-button';
-    messageButton.onclick = function() {
-        toggleMessageContainer(row.rowIndex - 1, row.parentNode.parentNode.id);
-    };
-    actionsCell.appendChild(messageButton);
-
-    const messageContainer = document.createElement('div');
-    messageContainer.className = 'message-container';
-    const messageHeader = document.createElement('div');
-    messageHeader.className = 'message-header';
-    messageHeader.textContent = 'メッセージ';
-
-    const messageForm = document.createElement('div');
-    messageForm.className = 'message-form';
-    const messageTextarea = document.createElement('textarea');
-    messageTextarea.placeholder = 'ここにメッセージを入力...';
-    const sendMessageButton = document.createElement('button');
-    sendMessageButton.textContent = '送信';
-    sendMessageButton.onclick = function() {
-        sendMessage(messageTextarea.value, messageContainer, sender);
-    };
-
-    messageForm.appendChild(messageTextarea);
-    messageForm.appendChild(sendMessageButton);
-    messageContainer.appendChild(messageHeader);
-    messageContainer.appendChild(messageForm);
-    actionsCell.appendChild(messageContainer);
-
-    updateRowStyle(row, progress, status, deadline);
-}
-
-function updateCells(row, task, progress, status, priority, deadline, assignee, sender) {
-    row.cells[0].textContent = task;
-
-    const progressBar = row.cells[1].querySelector('.progress-bar');
-    progressBar.style.width = progress + '%';
-    progressBar.textContent = progress + '%';
-
-    row.cells[1].textContent = progress + '%';
-    row.cells[1].appendChild(progressBar);
-
-    row.cells[2].textContent = status;
-    row.cells[3].textContent = ['高', '中', '低'][priority - 1];
-    row.cells[4].textContent = deadline;
-    row.cells[5].textContent = assignee;
-
-    row.cells[5].className = getAssigneeColor(assignee);
-
-    updateRowStyle(row, progress, status, deadline);
-}
-
-function updateRowStyle(row, progress, status, deadline) {
-    row.classList.remove('category-high', 'category-medium', 'category-low', 'warning', 'overdue', 'completed');
-    if (status === '完了') {
-        row.classList.add('completed');
-    } else {
-        if (progress >= 75) {
-            row.classList.add('category-high');
-        } else if (progress >= 50) {
-            row.classList.add('category-medium');
-        } else {
-            row.classList.add('category-low');
-        }
-
-        const today = new Date();
-        const deadlineDate = new Date(deadline);
-        const timeDiff = deadlineDate.getTime() - today.getTime();
-        const dayDiff = timeDiff / (1000 * 3600 * 24);
-
-        if (dayDiff <= 3 && dayDiff >= 0) {
-            row.classList.add('warning');
-        } else if (dayDiff < 0) {
-            row.classList.add('overdue');
-        }
-    }
-}
-
-function checkWarnings() {
-    const tables = ['labor-task-table', 'general-task-table'];
-    let hasWarning = false;
-
-    tables.forEach(tableId => {
-        const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
-        const rows = table.getElementsByTagName('tr');
-
-        for (let i = 0; i < rows.length; i++) {
-            if (rows[i].classList.contains('warning') || rows[i].classList.contains('overdue')) {
-                hasWarning = true;
-                break;
-            }
-        }
-    });
-
-    if (hasWarning) {
-        document.getElementById('warning-message').style.display = 'block';
-    } else {
-        document.getElementById('warning-message').style.display = 'none';
-    }
-}
-
-function editTask(index, tableId) {
-    const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
-    const row = table.rows[index];
-
-    document.getElementById('category').value = tableId === 'labor-task-table' ? '労務' : '総務';
-    document.getElementById('task').value = row.cells[0].textContent;
-    document.getElementById('progress').value = parseInt(row.cells[1].querySelector('.progress-bar').textContent);
-    document.getElementById('status').value = row.cells[2].textContent;
-    document.getElementById('priority').value = ['高', '中', '低'].indexOf(row.cells[3].textContent) + 1;
-    document.getElementById('deadline').value = row.cells[4].textContent;
-    document.getElementById('assignee').value = row.cells[5].textContent;
-    document.getElementById('sender').value = '';
-    document.getElementById('edit-index').value = index;
-}
-
-function deleteTask(index, tableId) {
-    const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
-    table.deleteRow(index);
-    document.getElementById('edit-index').value = '';
-    checkWarnings();
-}
-
-function filterTasks() {
-    const searchInput = document.getElementById('search').value.toLowerCase();
-    const tables = ['labor-task-table', 'general-task-table'];
-
-    tables.forEach(tableId => {
-        const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
-        const rows = table.getElementsByTagName('tr');
-
-        for (let i = 0; i < rows.length; i++) {
-            const cells = rows[i].getElementsByTagName('td');
-            const taskName = cells[0].textContent.toLowerCase();
-            const assigneeName = cells[5].textContent.toLowerCase();
-            if (taskName.indexOf(searchInput) > -1 || assigneeName.indexOf(searchInput) > -1) {
-                rows[i].style.display = "";
-            } else {
-                rows[i].style.display = "none";
-            }
-        }
-    });
-}
-
-function sortTable(table) {
-    const rows = Array.from(table.rows);
-
-    rows.sort((a, b) => {
-        const statusA = a.cells[2].textContent === '完了' ? 1 : 0;
-        const statusB = b.cells[2].textContent === '完了' ? 1 : 0;
-
-        if (statusA !== statusB) {
-            return statusA - statusB;
-        }
-
-        const deadlineA = new Date(a.cells[4].textContent);
-        const deadlineB = new Date(b.cells[4].textContent);
-        return deadlineA - deadlineB;
-    });
-
-    rows.forEach(row => table.appendChild(row));
-}
-
-function getAssigneeColor(assignee) {
-    const assigneeHash = assignee.split('').reduce((hash, char) => {
-        return char.charCodeAt(0) + ((hash << 5) - hash);
-    }, 0);
-
-    const color = `hsl(${assigneeHash % 360}, 70%, 80%)`;
-    return `background-color: ${color};`;
-}
-
-function toggleMessageContainer(index, tableId) {
-    const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
-    const row = table.rows[index];
-    const messageContainer = row.querySelector('.message-container');
-    messageContainer.style.display = messageContainer.style.display === 'none' ? 'block' : 'none';
-}
-
-function sendMessage(message, container, sender) {
-    if (message && sender) {
-        const messageList = container.querySelector('.message-list');
-        if (!messageList) {
-            const newMessageList = document.createElement('ul');
-            newMessageList.className = 'message-list';
-            container.appendChild(newMessageList);
-        }
-        const newMessage = document.createElement('li');
-        newMessage.className = 'sender';
-        newMessage.textContent = `${sender}: ${message}`;
-        container.querySelector('.message-list').appendChild(newMessage);
-        container.querySelector('textarea').value = '';
-    } else {
-        alert('メッセージと送信者を入力してください。');
-    }
-}
+            <h2>総務</h2>
+            <table id="general-task-table">
+                <thead>
+                    <tr>
+                        <th>タスク</th>
+                        <th>進捗</th>
+                        <th>ステータス</th>
+                        <th>優先順位</th>
+                        <th>期日</th>
+                        <th>担当者</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
