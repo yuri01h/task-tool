@@ -255,3 +255,28 @@ function checkWarnings() {
 
     document.getElementById('warning-message').style.display = hasWarning ? 'block' : 'none';
 }
+
+function getTableId(category) {
+    switch (category) {
+        case '労務':
+            return 'labor-task-table';
+        case '総務':
+            return 'general-task-table';
+        default:
+            return `${category}-task-table`;
+    }
+}
+
+function editTask(index, tableId) {
+    const row = document.getElementById(tableId).rows[index + 1]; // +1 because of the header row
+
+    document.getElementById('category').value = tableId.replace('-task-table', '');
+    document.getElementById('task').value = row.cells[0].textContent;
+    document.getElementById('progress').value = parseInt(row.cells[1].querySelector('.progress-bar').textContent);
+    document.getElementById('status').value = row.cells[2].textContent;
+    document.getElementById('priority').value = ['高', '中', '低'].indexOf(row.cells[3].textContent) + 1;
+    document.getElementById('deadline').value = row.cells[4].textContent;
+    document.getElementById('assignee').value = row.cells[5].textContent;
+    document.getElementById('sender').value = '';
+    document.getElementById('edit-index').value = index;
+}
