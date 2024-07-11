@@ -229,7 +229,8 @@ function toggleMessageContainer(index, tableId) {
     messageContainer.style.display = messageContainer.style.display === 'none' ? 'block' : 'none';
 }
 
-function sendMessage(message, container, sender) {
+function sendMessage(message, container) {
+    const sender = document.getElementById('sender').value.trim();
     if (message && sender) {
         const messageList = container.querySelector('.message-list');
         const newMessage = document.createElement('li');
