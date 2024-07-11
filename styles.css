@@ -9,11 +9,11 @@ body {
     align-items: center;
     justify-content: flex-start;
     min-height: 100vh;
-    font-size: 18px; /* 文字サイズを大きくする */
+    font-size: 18px;
 }
 
 h1 {
-    font-size: 3.5rem; /* 見出しの文字サイズを大きくする */
+    font-size: 3.5rem;
     color: #333;
     margin: 20px 0;
 }
@@ -36,7 +36,7 @@ form {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 30px;
-    font-size: 1rem; /* フォームの文字サイズを大きくする */
+    font-size: 1rem;
 }
 
 form label {
@@ -89,7 +89,7 @@ th, td {
     border: 1px solid #ddd;
     padding: 15px;
     text-align: left;
-    font-size: 1.1rem; /* テーブルの文字サイズを大きくする */
+    font-size: 1.1rem;
 }
 
 th {
