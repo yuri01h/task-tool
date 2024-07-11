@@ -108,8 +108,119 @@ function addCells(row, task, progress, status, priority, deadline, assignee, sen
     editButton.onclick = function() {
         editTask(row.rowIndex - 1, row.parentNode.parentNode.id);
     };
-    actionsCell.appendChild(edit
-    function editTask(index, tableId) {
+    actionsCell.appendChild(editButton);
+
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = '削除';
+    deleteButton.className = 'delete-button';
+    deleteButton.onclick = function() {
+        deleteTask(row.rowIndex - 1, row.parentNode.parentNode.id);
+    };
+    actionsCell.appendChild(deleteButton);
+
+    const messageButton = document.createElement('button');
+    messageButton.textContent = 'メッセージ';
+    messageButton.className = 'message-button';
+    messageButton.onclick = function() {
+        toggleMessageContainer(row.rowIndex - 1, row.parentNode.parentNode.id);
+    };
+    actionsCell.appendChild(messageButton);
+
+    const messageContainer = document.createElement('div');
+    messageContainer.className = 'message-container';
+    const messageHeader = document.createElement('div');
+    messageHeader.className = 'message-header';
+    messageHeader.textContent = 'メッセージ';
+
+    const messageForm = document.createElement('div');
+    messageForm.className = 'message-form';
+    const messageTextarea = document.createElement('textarea');
+    messageTextarea.placeholder = 'ここにメッセージを入力...';
+    const sendMessageButton = document.createElement('button');
+    sendMessageButton.textContent = '送信';
+    sendMessageButton.onclick = function() {
+        sendMessage(messageTextarea.value, messageContainer, sender);
+    };
+
+    messageForm.appendChild(messageTextarea);
+    messageForm.appendChild(sendMessageButton);
+    messageContainer.appendChild(messageHeader);
+    messageContainer.appendChild(messageForm);
+    actionsCell.appendChild(messageContainer);
+
+    updateRowStyle(row, progress, status, deadline);
+}
+
+function updateCells(row, task, progress, status, priority, deadline, assignee, sender) {
+    row.cells[0].textContent = task;
+
+    const progressBar = row.cells[1].querySelector('.progress-bar');
+    progressBar.style.width = progress + '%';
+    progressBar.textContent = progress + '%';
+
+    row.cells[1].textContent = progress + '%';
+    row.cells[1].appendChild(progressBar);
+
+    row.cells[2].textContent = status;
+    row.cells[3].textContent = ['高', '中', '低'][priority - 1];
+    row.cells[4].textContent = deadline;
+    row.cells[5].textContent = assignee;
+
+    row.cells[5].className = getAssigneeColor(assignee);
+
+    updateRowStyle(row, progress, status, deadline);
+}
+
+function updateRowStyle(row, progress, status, deadline) {
+    row.classList.remove('category-high', 'category-medium', 'category-low', 'warning', 'overdue', 'completed');
+    if (status === '完了') {
+        row.classList.add('completed');
+    } else {
+        if (progress >= 75) {
+            row.classList.add('category-high');
+        } else if (progress >= 50) {
+            row.classList.add('category-medium');
+        } else {
+            row.classList.add('category-low');
+        }
+
+        const today = new Date();
+        const deadlineDate = new Date(deadline);
+        const timeDiff = deadlineDate.getTime() - today.getTime();
+        const dayDiff = timeDiff / (1000 * 3600 * 24);
+
+        if (dayDiff <= 3 && dayDiff >= 0) {
+            row.classList.add('warning');
+        } else if (dayDiff < 0) {
+            row.classList.add('overdue');
+        }
+    }
+}
+
+function checkWarnings() {
+    const tables = ['labor-task-table', 'general-task-table'];
+    let hasWarning = false;
+
+    tables.forEach(tableId => {
+        const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+        const rows = table.getElementsByTagName('tr');
+
+        for (let i = 0; i < rows.length; i++) {
+            if (rows[i].classList.contains('warning') || rows[i].classList.contains('overdue')) {
+                hasWarning = true;
+                break;
+            }
+        }
+    });
+
+    if (hasWarning) {
+        document.getElementById('warning-message').style.display = 'block';
+    } else {
+        document.getElementById('warning-message').style.display = 'none';
+    }
+}
+
+function editTask(index, tableId) {
     const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
     const row = table.rows[index];
 
