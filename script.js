@@ -131,7 +131,7 @@ function deleteCategory(category) {
     }
 }
 
-function addCells(row, task, progress, status, priority, deadline, assignee, sender) {
+function addCells(row, task, progress, status, priority, deadline, assignee) {
     row.innerHTML = `
         <td>${task}</td>
         <td>${progress}%<div class="progress-bar" style="width: ${progress}%">${progress}%</div></td>
@@ -147,7 +147,7 @@ function addCells(row, task, progress, status, priority, deadline, assignee, sen
                 <div class="message-header">メッセージ</div>
                 <div class="message-form">
                     <textarea placeholder="ここにメッセージを入力..."></textarea>
-                    <button onclick="sendMessage(this.previousElementSibling.value, this.parentNode.parentNode.parentNode, '${sender}')">送信</button>
+                    <button onclick="sendMessage(this.previousElementSibling.value, this.parentNode.parentNode)">送信</button>
                 </div>
                 <ul class="message-list"></ul>
             </div>
