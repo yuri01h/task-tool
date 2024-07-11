@@ -18,7 +18,7 @@
         <label for="new-category">新しいカテゴリーを追加:</label>
         <input type="text" id="new-category">
         <button type="button" onclick="addCategory()">追加</button>
-        <button type="button" onclick="deleteCategory(document.getElementById('category').value)">カテゴリー削除</button> <!-- 追加部分 -->
+        <button type="button" onclick="deleteCategory(document.getElementById('category').value)">カテゴリー削除</button>
 
         <label for="task">タスク:</label>
         <input type="text" id="task">
@@ -51,6 +51,7 @@
 
         <input type="hidden" id="edit-index">
         <button type="submit">タスクを追加</button>
+        <button type="button" onclick="saveTasks()">保存</button>
     </form>
 
     <input type="text" id="search" placeholder="タスクや担当者を検索..." onkeyup="filterTasks()">
