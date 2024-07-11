@@ -10,7 +10,7 @@ document.getElementById('task-form').addEventListener('submit', function(event) 
     const priority = document.getElementById('priority').value;
     const deadline = document.getElementById('deadline').value;
     const assignee = document.getElementById('assignee').value;
-    const sender = document.getElementById('sender').value;
+    const sender = assignee; // 送信者を担当者として設定
     const editIndex = document.getElementById('edit-index').value;
 
     const tableId = getTableId(category);
@@ -63,7 +63,7 @@ function loadTasks() {
             const table = document.getElementById(`${category}-task-table`).querySelector('tbody');
             tasks[category].forEach(taskData => {
                 const newRow = table.insertRow();
-                addCells(newRow, taskData.task, taskData.progress, taskData.status, taskData.priority, taskData.deadline, taskData.assignee, '');
+                addCells(newRow, taskData.task, taskData.progress, taskData.status, taskData.priority, taskData.deadline, taskData.assignee, taskData.assignee);
             });
         }
     }
@@ -131,7 +131,7 @@ function deleteCategory(category) {
     }
 }
 
-function addCells(row, task, progress, status, priority, deadline, assignee) {
+function addCells(row, task, progress, status, priority, deadline, assignee, sender) {
     row.innerHTML = `
         <td>${task}</td>
         <td>${progress}%<div class="progress-bar" style="width: ${progress}%">${progress}%</div></td>
@@ -147,7 +147,7 @@ function addCells(row, task, progress, status, priority, deadline, assignee) {
                 <div class="message-header">メッセージ</div>
                 <div class="message-form">
                     <textarea placeholder="ここにメッセージを入力..."></textarea>
-                    <button onclick="sendMessage(this.previousElementSibling.value, this.parentNode.parentNode)">送信</button>
+                    <button onclick="sendMessage(this.previousElementSibling.value, this.parentNode.parentNode, '${assignee}')">送信</button>
                 </div>
                 <ul class="message-list"></ul>
             </div>
@@ -155,39 +155,6 @@ function addCells(row, task, progress, status, priority, deadline, assignee) {
     `;
     updateRowStyle(row, progress, status, deadline);
 }
-
-document.addEventListener('DOMContentLoaded', loadTasks);
-
-document.getElementById('task-form').addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    const category = document.getElementById('category').value;
-    const task = document.getElementById('task').value;
-    const progress = document.getElementById('progress').value;
-    const status = document.getElementById('status').value;
-    const priority = document.getElementById('priority').value;
-    const deadline = document.getElementById('deadline').value;
-    const assignee = document.getElementById('assignee').value;
-    const sender = document.getElementById('sender').value;  // ここで送信者を取得
-    const editIndex = document.getElementById('edit-index').value;
-
-    const tableId = getTableId(category);
-    const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
-
-    if (editIndex === '') {
-        const newRow = table.insertRow();
-        addCells(newRow, task, progress, status, priority, deadline, assignee, sender);
-    } else {
-        const row = table.rows[editIndex];
-        updateCells(row, task, progress, status, priority, deadline, assignee, sender);
-        document.getElementById('edit-index').value = '';
-    }
-
-    saveTasks();
-    sortTable(table);
-    document.getElementById('task-form').reset();
-    checkWarnings();
-});
 
 function updateCells(row, task, progress, status, priority, deadline, assignee, sender) {
     row.cells[0].textContent = task;
@@ -262,8 +229,7 @@ function toggleMessageContainer(index, tableId) {
     messageContainer.style.display = messageContainer.style.display === 'none' ? 'block' : 'none';
 }
 
-function sendMessage(message, container) {
-    const sender = document.getElementById('sender').value.trim();
+function sendMessage(message, container, sender) {
     if (message && sender) {
         const messageList = container.querySelector('.message-list');
         const newMessage = document.createElement('li');
@@ -311,6 +277,6 @@ function editTask(index, tableId) {
     document.getElementById('priority').value = ['高', '中', '低'].indexOf(row.cells[3].textContent) + 1;
     document.getElementById('deadline').value = row.cells[4].textContent;
     document.getElementById('assignee').value = row.cells[5].textContent;
-    document.getElementById('sender').value = '';
+    document.getElementById('sender').value = '';  // 送信者のフィールドはクリア
     document.getElementById('edit-index').value = index;
 }
