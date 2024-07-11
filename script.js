@@ -1,5 +1,3 @@
-document.addEventListener('DOMContentLoaded', loadTasks);
-
 document.getElementById('task-form').addEventListener('submit', function(event) {
     event.preventDefault();
 
@@ -25,55 +23,13 @@ document.getElementById('task-form').addEventListener('submit', function(event) 
         document.getElementById('edit-index').value = '';
     }
 
-    saveTasks();
     sortTable(table);
     document.getElementById('task-form').reset();
     checkWarnings();
 });
 
-function saveTasks() {
-    const tasks = {};
-    document.querySelectorAll('table').forEach(table => {
-        const category = table.id.replace('-task-table', '');
-        tasks[category] = [];
-        table.querySelectorAll('tbody tr').forEach(row => {
-            const task = {
-                task: row.cells[0].textContent,
-                progress: row.cells[1].querySelector('.progress-bar').textContent.replace('%', ''),
-                status: row.cells[2].textContent,
-                priority: ['高', '中', '低'].indexOf(row.cells[3].textContent) + 1,
-                deadline: row.cells[4].textContent,
-                assignee: row.cells[5].textContent
-            };
-            tasks[category].push(task);
-        });
-    });
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-}
-
-function loadTasks() {
-    const tasks = JSON.parse(localStorage.getItem('tasks'));
-    if (!tasks) return;
-
-    for (const category in tasks) {
-        if (tasks.hasOwnProperty(category)) {
-            if (!document.getElementById(`${category}-task-table`)) {
-                addCategory(category);
-            }
-            const table = document.getElementById(`${category}-task-table`).querySelector('tbody');
-            tasks[category].forEach(taskData => {
-                const newRow = table.insertRow();
-                addCells(newRow, taskData.task, taskData.progress, taskData.status, taskData.priority, taskData.deadline, taskData.assignee, '');
-            });
-        }
-    }
-    checkWarnings();
-}
-
-function addCategory(newCategory) {
-    if (typeof newCategory !== 'string') {
-        newCategory = document.getElementById('new-category').value.trim();
-    }
+function addCategory() {
+    const newCategory = document.getElementById('new-category').value.trim();
     if (newCategory) {
         const categorySelect = document.getElementById('category');
         const newOption = new Option(newCategory, newCategory);
@@ -108,26 +64,14 @@ function addCategory(newCategory) {
     }
 }
 
-function deleteTask(index, tableId) {
-    const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
-    table.deleteRow(index);
-    document.getElementById('edit-index').value = '';
-
-    const category = tableId.replace('-task-table', '');
-    if (!table.rows.length) {
-        deleteCategory(category);
-    }
-
-    saveTasks();
-    checkWarnings();
-}
-
-function deleteCategory(category) {
-    const table = document.getElementById(`${category}-task-table`);
-    if (table) {
-        table.parentNode.remove();
-        document.querySelector(`#category option[value="${category}"]`).remove();
-        saveTasks();
+function getTableId(category) {
+    switch (category) {
+        case '労務':
+            return 'labor-task-table';
+        case '総務':
+            return 'general-task-table';
+        default:
+            return `${category}-task-table`;
     }
 }
 
@@ -186,12 +130,46 @@ function updateRowStyle(row, progress, status, deadline) {
     }
 }
 
+function checkWarnings() {
+    const tables = ['labor-task-table', 'general-task-table'];
+    let hasWarning = false;
+
+    tables.forEach(tableId => {
+        const rows = document.getElementById(tableId).querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            if (row.classList.contains('warning') || row.classList.contains('overdue')) hasWarning = true;
+        });
+    });
+
+    document.getElementById('warning-message').style.display = hasWarning ? 'block' : 'none';
+}
+
+function editTask(index, tableId) {
+    const row = document.getElementById(tableId).rows[index + 1]; // +1 because of the header row
+
+    document.getElementById('category').value = tableId === 'labor-task-table' ? '労務' : '総務';
+    document.getElementById('task').value = row.cells[0].textContent;
+    document.getElementById('progress').value = parseInt(row.cells[1].querySelector('.progress-bar').textContent);
+    document.getElementById('status').value = row.cells[2].textContent;
+    document.getElementById('priority').value = ['高', '中', '低'].indexOf(row.cells[3].textContent) + 1;
+    document.getElementById('deadline').value = row.cells[4].textContent;
+    document.getElementById('assignee').value = row.cells[5].textContent;
+    document.getElementById('sender').value = '';
+    document.getElementById('edit-index').value = index;
+}
+
+function deleteTask(index, tableId) {
+    document.getElementById(tableId).deleteRow(index + 1); // +1 because of the header row
+    document.getElementById('edit-index').value = '';
+    checkWarnings();
+}
+
 function filterTasks() {
     const searchInput = document.getElementById('search').value.toLowerCase();
-    const tables = document.querySelectorAll('table');
+    const tables = ['labor-task-table', 'general-task-table'];
 
-    tables.forEach(table => {
-        const rows = table.querySelectorAll('tbody tr');
+    tables.forEach(tableId => {
+        const rows = document.getElementById(tableId).querySelectorAll('tbody tr');
         rows.forEach(row => {
             const taskName = row.cells[0].textContent.toLowerCase();
             const assigneeName = row.cells[5].textContent.toLowerCase();
@@ -240,43 +218,4 @@ function sendMessage(message, container, sender) {
     } else {
         alert('メッセージと送信者を入力してください。');
     }
-}
-
-function checkWarnings() {
-    const tables = document.querySelectorAll('table');
-    let hasWarning = false;
-
-    tables.forEach(table => {
-        const rows = table.querySelectorAll('tbody tr');
-        rows.forEach(row => {
-            if (row.classList.contains('warning') || row.classList.contains('overdue')) hasWarning = true;
-        });
-    });
-
-    document.getElementById('warning-message').style.display = hasWarning ? 'block' : 'none';
-}
-
-function getTableId(category) {
-    switch (category) {
-        case '労務':
-            return 'labor-task-table';
-        case '総務':
-            return 'general-task-table';
-        default:
-            return `${category}-task-table`;
-    }
-}
-
-function editTask(index, tableId) {
-    const row = document.getElementById(tableId).rows[index + 1]; // +1 because of the header row
-
-    document.getElementById('category').value = tableId.replace('-task-table', '');
-    document.getElementById('task').value = row.cells[0].textContent;
-    document.getElementById('progress').value = parseInt(row.cells[1].querySelector('.progress-bar').textContent);
-    document.getElementById('status').value = row.cells[2].textContent;
-    document.getElementById('priority').value = ['高', '中', '低'].indexOf(row.cells[3].textContent) + 1;
-    document.getElementById('deadline').value = row.cells[4].textContent;
-    document.getElementById('assignee').value = row.cells[5].textContent;
-    document.getElementById('sender').value = '';
-    document.getElementById('edit-index').value = index;
 }
