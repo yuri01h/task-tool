@@ -131,6 +131,61 @@ function deleteCategory(category) {
     }
 }
 
+function addCells(row, task, progress, status, priority, deadline, assignee, sender) {
+    row.innerHTML = `
+        <td>${task}</td>
+        <td>${progress}%<div class="progress-bar" style="width: ${progress}%">${progress}%</div></td>
+        <td>${status}</td>
+        <td>${['高', '中', '低'][priority - 1]}</td>
+        <td>${deadline}</td>
+        <td style="${getAssigneeColor(assignee)}">${assignee}</td>
+        <td>
+            <button class="edit-button" onclick="editTask(${row.rowIndex - 1}, '${row.parentNode.parentNode.id}')">編集</button>
+            <button class="delete-button" onclick="deleteTask(${row.rowIndex - 1}, '${row.parentNode.parentNode.id}')">削除</button>
+            <button class="message-button" onclick="toggleMessageContainer(${row.rowIndex - 1}, '${row.parentNode.parentNode.id}')">メッセージ</button>
+            <div class="message-container">
+                <div class="message-header">メッセージ</div>
+                <div class="message-form">
+                    <textarea placeholder="ここにメッセージを入力..."></textarea>
+                    <button onclick="sendMessage(this.previousElementSibling.value, this.parentNode.parentNode, '${sender}')">送信</button>
+                </div>
+                <ul class="message-list"></ul>
+            </div>
+        </td>
+    `;
+    updateRowStyle(row, progress, status, deadline);
+}
+
+function updateCells(row, task, progress, status, priority, deadline, assignee, sender) {
+    row.cells[0].textContent = task;
+    row.cells[1].innerHTML = `${progress}%<div class="progress-bar" style="width: ${progress}%">${progress}%</div>`;
+    row.cells[2].textContent = status;
+    row.cells[3].textContent = ['高', '中', '低'][priority - 1];
+    row.cells[4].textContent = deadline;
+    row.cells[5].style = getAssigneeColor(assignee);
+    row.cells[5].textContent = assignee;
+    updateRowStyle(row, progress, status, deadline);
+}
+
+function updateRowStyle(row, progress, status, deadline) {
+    row.className = '';
+    if (status === '完了') {
+        row.classList.add('completed');
+    } else {
+        if (progress >= 75) row.classList.add('category-high');
+        else if (progress >= 50) row.classList.add('category-medium');
+        else row.classList.add('category-low');
+
+        const today = new Date();
+        const deadlineDate = new Date(deadline);
+        const timeDiff = deadlineDate - today;
+        const dayDiff = timeDiff / (1000 * 3600 * 24);
+
+        if (dayDiff <= 3 && dayDiff >= 0) row.classList.add('warning');
+        else if (dayDiff < 0) row.classList.add('overdue');
+    }
+}
+
 function filterTasks() {
     const searchInput = document.getElementById('search').value.toLowerCase();
     const tables = document.querySelectorAll('table');
@@ -199,4 +254,29 @@ function checkWarnings() {
     });
 
     document.getElementById('warning-message').style.display = hasWarning ? 'block' : 'none';
+}
+
+function getTableId(category) {
+    switch (category) {
+        case '労務':
+            return 'labor-task-table';
+        case '総務':
+            return 'general-task-table';
+        default:
+            return `${category}-task-table`;
+    }
+}
+
+function editTask(index, tableId) {
+    const row = document.getElementById(tableId).rows[index + 1]; // +1 because of the header row
+
+    document.getElementById('category').value = tableId.replace('-task-table', '');
+    document.getElementById('task').value = row.cells[0].textContent;
+    document.getElementById('progress').value = parseInt(row.cells[1].querySelector('.progress-bar').textContent);
+    document.getElementById('status').value = row.cells[2].textContent;
+    document.getElementById('priority').value = ['高', '中', '低'].indexOf(row.cells[3].textContent) + 1;
+    document.getElementById('deadline').value = row.cells[4].textContent;
+    document.getElementById('assignee').value = row.cells[5].textContent;
+    document.getElementById('sender').value = '';
+    document.getElementById('edit-index').value = index;
 }
