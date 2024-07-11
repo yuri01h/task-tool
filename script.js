@@ -31,6 +31,11 @@ document.getElementById('task-form').addEventListener('submit', function(event) 
     checkWarnings();
 });
 
+document.getElementById('save-button').addEventListener('click', function() {
+    saveTasks();
+    loadTasks(); // 全てのタスクを再読み込みして表示
+});
+
 function saveTasks() {
     const tasks = {};
     document.querySelectorAll('table').forEach(table => {
@@ -54,6 +59,8 @@ function saveTasks() {
 function loadTasks() {
     const tasks = JSON.parse(localStorage.getItem('tasks'));
     if (!tasks) return;
+
+    document.querySelectorAll('tbody').forEach(tbody => tbody.innerHTML = ''); // テーブルをクリア
 
     for (const category in tasks) {
         if (tasks.hasOwnProperty(category)) {
