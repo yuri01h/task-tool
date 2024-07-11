@@ -156,6 +156,39 @@ function addCells(row, task, progress, status, priority, deadline, assignee) {
     updateRowStyle(row, progress, status, deadline);
 }
 
+document.addEventListener('DOMContentLoaded', loadTasks);
+
+document.getElementById('task-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const category = document.getElementById('category').value;
+    const task = document.getElementById('task').value;
+    const progress = document.getElementById('progress').value;
+    const status = document.getElementById('status').value;
+    const priority = document.getElementById('priority').value;
+    const deadline = document.getElementById('deadline').value;
+    const assignee = document.getElementById('assignee').value;
+    const sender = document.getElementById('sender').value;  // ここで送信者を取得
+    const editIndex = document.getElementById('edit-index').value;
+
+    const tableId = getTableId(category);
+    const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+
+    if (editIndex === '') {
+        const newRow = table.insertRow();
+        addCells(newRow, task, progress, status, priority, deadline, assignee, sender);
+    } else {
+        const row = table.rows[editIndex];
+        updateCells(row, task, progress, status, priority, deadline, assignee, sender);
+        document.getElementById('edit-index').value = '';
+    }
+
+    saveTasks();
+    sortTable(table);
+    document.getElementById('task-form').reset();
+    checkWarnings();
+});
+
 function updateCells(row, task, progress, status, priority, deadline, assignee, sender) {
     row.cells[0].textContent = task;
     row.cells[1].innerHTML = `${progress}%<div class="progress-bar" style="width: ${progress}%">${progress}%</div>`;
