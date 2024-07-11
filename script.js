@@ -235,6 +235,7 @@ function sendMessage(message, container, sender) {
         const newMessage = document.createElement('li');
         newMessage.className = 'sender';
         newMessage.textContent = `${sender}: ${message}`;
+        newMessage.style = getAssigneeColor(sender); // メッセージの色を担当者の色と同じにする
         messageList.appendChild(newMessage);
         container.querySelector('textarea').value = '';
     } else {
@@ -277,6 +278,5 @@ function editTask(index, tableId) {
     document.getElementById('priority').value = ['高', '中', '低'].indexOf(row.cells[3].textContent) + 1;
     document.getElementById('deadline').value = row.cells[4].textContent;
     document.getElementById('assignee').value = row.cells[5].textContent;
-    document.getElementById('sender').value = '';  // 送信者のフィールドはクリア
     document.getElementById('edit-index').value = index;
 }
