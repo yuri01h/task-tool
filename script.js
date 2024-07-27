@@ -53,28 +53,44 @@ function saveTasks() {
             tasks[category].push(task);
         });
     });
-    localStorage.setItem('tasks', JSON.stringify(tasks));
+
+    fetch('http://localhost:3000/tasks', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(tasks),
+    }).then(response => {
+        if (response.ok) {
+            alert('Tasks saved successfully!');
+        } else {
+            alert('Failed to save tasks');
+        }
+    });
 }
 
 function loadTasks() {
-    const tasks = JSON.parse(localStorage.getItem('tasks'));
-    if (!tasks) return;
+    fetch('http://localhost:3000/tasks')
+        .then(response => response.json())
+        .then(tasks => {
+            if (!tasks) return;
 
-    document.querySelectorAll('tbody').forEach(tbody => tbody.innerHTML = ''); // テーブルをクリア
+            document.querySelectorAll('tbody').forEach(tbody => tbody.innerHTML = ''); // テーブルをクリア
 
-    for (const category in tasks) {
-        if (tasks.hasOwnProperty(category)) {
-            if (!document.getElementById(`${category}-task-table`)) {
-                addCategory(category);
+            for (const category in tasks) {
+                if (tasks.hasOwnProperty(category)) {
+                    if (!document.getElementById(`${category}-task-table`)) {
+                        addCategory(category);
+                    }
+                    const table = document.getElementById(`${category}-task-table`).querySelector('tbody');
+                    tasks[category].forEach(taskData => {
+                        const newRow = table.insertRow();
+                        addCells(newRow, taskData.task, taskData.progress, taskData.status, taskData.priority, taskData.deadline, taskData.assignee, taskData.assignee);
+                    });
+                }
             }
-            const table = document.getElementById(`${category}-task-table`).querySelector('tbody');
-            tasks[category].forEach(taskData => {
-                const newRow = table.insertRow();
-                addCells(newRow, taskData.task, taskData.progress, taskData.status, taskData.priority, taskData.deadline, taskData.assignee, taskData.assignee);
-            });
-        }
-    }
-    checkWarnings();
+            checkWarnings();
+        });
 }
 
 function addCategory(newCategory) {
