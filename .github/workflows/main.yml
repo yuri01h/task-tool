@@ -1,0 +1,12 @@
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # 他のステップがここに含まれる
+      - name: Deploy
+        uses: some-deployment-action@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        permissions:
+          id-token: write
+          contents: write
